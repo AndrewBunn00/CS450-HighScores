@@ -1,4 +1,5 @@
 import sys
+import time
 
 
 class Data:
@@ -7,12 +8,15 @@ class Data:
         self.data2D = []
         self.categories = ["SKILL_BREAKDANCING", "SKILL_APICULTURE", "SKILL_BASKET",
                            "SKILL_XBASKET", "SKILL_SWORD", "TOTAL_XP"]
-        self.breakDancingOut = ["SKILL_BREAKDANCING"]
-        self.apicultureOut = ["SKILL_APICULTURE"]
-        self.basketOut = ["SKILL_BASKET"]
-        self.xBasketOut = ["SKILL_XBASKET"]
-        self.swordOut = ["SKILL_SWORD"]
-        self.totalXpOut = ["TOTAL_XP"]
+        self.breakDancingOut = []
+        self.apicultureOut = []
+        self.basketOut = []
+        self.xBasketOut = []
+        self.swordOut = []
+        self.totalXpOut = []
+
+        self.time = []
+        self.totalTime = 0
 
         self.allSkills = [self.breakDancingOut, self.apicultureOut, self.basketOut,
                           self.xBasketOut, self.swordOut, self.totalXpOut]
@@ -22,20 +26,30 @@ class Data:
         Print all lists to standard out
         :return:
         """
-        for list in self.allSkills:
-            for entry in list:
+        for i, curList in enumerate(self.allSkills):
+            print(self.categories[i])
+            for entry in curList[::-1]:
                 print(entry)
-            print("")
+            print("time taken: " + str(self.time[i]) + "\n")
+
+        print("total time taken: " + str(self.totalTime))
 
     def printAllListsToFile(self):
         """
         Will edit to print lists to a file
-        :return:
         """
-        for list in self.allSkills:
-            for entry in list:
-                print(entry)
-            print("")
+        with open("testOut", "w+") as file:
+            # for each skill
+            for i, curList in enumerate(self.allSkills):
+                # output the skill name
+                file.write(self.categories[i] + "\n")
+                for entry in curList[::-1]:
+                    # output the values
+                    file.write(str(entry) + "\n")
+                file.write("time taken: " + str(self.time[i]) + "\n\n")
+
+            file.write("total time taken: " + str(self.totalTime))
+            # file.close()
 
     def fileReader(self, filename):
         """
@@ -52,18 +66,12 @@ class Data:
         """
         Reads input from standard in and puts it in lines
         """
-        readFirstLine = False
         for line in sys.stdin:
-            if not readFirstLine:  # skip the first line (dimension)
-                readFirstLine = True
-                continue
-            else:
-                self.lines.append(line)
+            self.lines.append(line)
 
     def stripEndlines(self):
         """
         Remove all \n
-        :return:
         """
         for i, line in enumerate(self.lines):
             curLine = self.lines[i].rstrip()  # remove everything that is whitespace at the end of the line
@@ -73,7 +81,6 @@ class Data:
         """
         Fill out a 2D list with all the data
         Makes it easier to parse
-        :return:
         """
         for line in self.lines:  # loops over the rows
             if line:  # if line is an empty string, will skip over (evals to false)
@@ -88,32 +95,108 @@ class Data:
                 total += val
             row.append(total)
 
+
+    def fillOutAllSkills(self):
+        for line in self.lines:
+            numbers = [int(num) for num in line.split() if num.isdigit()]
+            self.allSkills[0].append(numbers[0])
+            self.allSkills[1].append(numbers[1])
+            self.allSkills[2].append(numbers[2])
+            self.allSkills[3].append(numbers[3])
+            self.allSkills[4].append(numbers[4])
+            self.totalXpOut.append((sum(numbers)))
+
+
     def turn2DToSepLists(self):
         """
         Add all data to its respective lists
-        :return:
         """
         for row in self.data2D:
             for i, val in enumerate(row):
                 self.allSkills[i].append(val)
 
-    # def readValuesToLists(self):
+
+    def prepDataForSort(self):
+        """
+        Get the data into the 2D list and add the total xp column
+        It is now ready for sorting
+        """
+        self.readFromStdIn()
+        self.stripEndlines()
+        self.turnLinesTo2DList()
+        self.fillOutAllSkills()
+
+    def hoaresQSort(self, low, high, listToSort):
+        if(low < high):
+            partition = self.hoaresPartition(low, high, listToSort)
+
+            self.hoaresQSort(low, partition, listToSort)
+            self.hoaresQSort(partition + 1, high, listToSort)
 
 
-def standardQSort():
-    print("This is quicksort")
 
 
-def myQSort():
-    print("This is Hoares Quicksort")
+    def hoaresPartition(self, low, high, listToSort):
+        piv = listToSort[(high+low) // 2]
+        left = low - 1
+        right = high + 1
+
+        while(True):
+            left += 1
+            while(listToSort[left] < piv):
+                left += 1
+            right -= 1
+            while(listToSort[right] > piv):
+                right -= 1
+            if left >= right:
+                return right
+            listToSort[left], listToSort[right] = listToSort[right], listToSort[left]
+
+
 
 
 # Press the green button in the gutter to run the script.
 if __name__ == '__main__':
+    # whichSort = ""
+    # if(whichSort == "standard"):
+    #     print("Standard")
+    # elif(whichSort == "custom"):
+    #     print("Custom")
+    #     data = Data()
+    #     data.prepDataForSort()
+    #
+    #     # turn data back to list
+    #     data.turn2DToSepLists()
+    #     data.printAllLists()
+
+
+
     data = Data()
-    data.readFromStdIn()
-    data.stripEndlines()
-    data.turnLinesTo2DList()
-    data.turn2DToSepLists()
+    data.prepDataForSort()
+    # listToSort = data.allSkills[0]
+
+    for skill in data.allSkills:
+        start_time = time.time_ns()
+        data.hoaresQSort(0, len(skill) - 1, skill)
+        time_taken_in_microseconds = (time.time_ns() - start_time) / 1000.0
+        data.time.append(time_taken_in_microseconds)
+        # file = open("testOut", "w")
+        # file.write("time taken: " + str(time_taken_in_microseconds))
+    data.totalTime = sum(data.time)
+
+
+
+    # data.hoaresQSort(0, len(data.allSkills[0]) - 1, data.allSkills[0])
+    # data.hoaresQSort(0, len(data.allSkills[1]) - 1, data.allSkills[1])
+    # data.hoaresQSort(0, len(data.allSkills[2]) - 1, data.allSkills[2])
+    # data.hoaresQSort(0, len(data.allSkills[3]) - 1, data.allSkills[3])
+    # data.hoaresQSort(0, len(data.allSkills[4]) - 1, data.allSkills[4])
+    # data.hoaresQSort(0, len(data.allSkills[5]) - 1, data.allSkills[5])
+
+    # data.fillOutAllSkills()
+
+    # turn data back to list
+    # data.turn2DToSepLists()
+    # data.printAllLists()
+    data.printAllListsToFile()
     data.printAllLists()
-    # print("WAAA")
