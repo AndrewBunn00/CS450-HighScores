@@ -32,7 +32,7 @@ class Data:
                 print(str(entry))
             print("time taken: " + str(self.time[i]) + "\n")
 
-        print("total time taken: " + str(self.totalTime))
+        print("total time taken: " + str(self.totalTime), end="")
 
     def printAllListsToFile(self):
         """
@@ -51,6 +51,7 @@ class Data:
             file.write("total time taken: " + str(self.totalTime))
             # file.close()
 
+
     def fileReader(self, filename):
         """
         Function reads the file, gets out all lines in the file
@@ -62,12 +63,14 @@ class Data:
             print(line)
         file.close()
 
+
     def readFromStdIn(self):
         """
         Reads input from standard in and puts it in lines
         """
         for line in sys.stdin:
             self.lines.append(line)
+
 
     def stripEndlines(self):
         """
@@ -76,6 +79,7 @@ class Data:
         for i, line in enumerate(self.lines):
             curLine = self.lines[i].rstrip()  # remove everything that is whitespace at the end of the line
             self.lines[i] = curLine
+
 
     def turnLinesTo2DList(self):
         """
@@ -127,14 +131,13 @@ class Data:
         # self.turnLinesTo2DList()
         self.fillOutAllSkills()
 
+
     def hoaresQSort(self, low, high, listToSort):
         if(low < high):
             partition = self.hoaresPartition(low, high, listToSort)
 
             self.hoaresQSort(low, partition, listToSort)
             self.hoaresQSort(partition + 1, high, listToSort)
-
-
 
 
     def hoaresPartition(self, low, high, listToSort):
@@ -154,8 +157,9 @@ class Data:
             listToSort[left], listToSort[right] = listToSort[right], listToSort[left]
 
 
-    def countingSort(self, maxValue, listToSort):
-        sorted = []
+    def customSort(self, maxValue, listToSort):
+        # COUNTING SORT
+        sortedList = []
         unsortedForMergeSort = []
         sortedMergeSort = []
         counts = [0] * (maxValue+1)
@@ -167,25 +171,20 @@ class Data:
         for i in range(maxValue):
             while(counts[i] > 0):
                 counts[i] -= 1
-                sorted.append(i)
+                sortedList.append(i)
 
         # get a list of anything over max value
         for val in listToSort:
             if val > maxValue:
                 unsortedForMergeSort.append(val)
 
+        # MERGE SORT
         sortedMergeSort = self.mergeSort(maxValue, unsortedForMergeSort)
 
-        finalList = sorted + sortedMergeSort
+        # Combine for the final list
+        finalList = sortedList + sortedMergeSort
         return finalList
 
-        # print(sorted)
-
-        # MERGE SORT
-
-        # save off counting sort list
-        # Then merge sort everything above maxVal in counting sort
-        # then combine two lists again
 
     def mergeSort(self, maxValue, listToSort):
         if len(listToSort) <= 1:
@@ -235,26 +234,31 @@ if __name__ == '__main__':
 # ===================================================
 #     data = Data()
 #     data.prepDataForSort()
-#     # listToSort = data.allSkills[0]
 #
 #     for skill in data.allSkills:
 #         start_time = time.time_ns()
 #         data.hoaresQSort(0, len(skill) - 1, skill)
 #         time_taken_in_microseconds = (time.time_ns() - start_time) / 1000.0
 #         data.time.append(time_taken_in_microseconds)
-#         # file = open("testOut", "w")
-#         # file.write("time taken: " + str(time_taken_in_microseconds))
+#
 #     data.totalTime = sum(data.time)
 #     data.printAllLists()
 # ===================================================
 
+# CUSTOM SORT
+# ===================================================
     data = Data()
     data.prepDataForSort()
-    # data.countingSort(10000, data.allSkills[0])
-    # helpMe = data.mergeSort(10000, data.allSkills[0])
-    data.allSkills[0] = data.countingSort(10000, data.allSkills[0])
-    print(data.allSkills[0])
 
+    for i, skill in enumerate(data.allSkills):
+        start_time = time.time_ns()
+        data.allSkills[i] = data.customSort(10000, skill)
+        time_taken_in_microseconds = (time.time_ns() - start_time) / 1000.0
+        data.time.append(int(time_taken_in_microseconds))
+
+    data.totalTime = sum(data.time)
+    data.printAllLists()
+# ===================================================
 
     # data.hoaresQSort(0, len(data.allSkills[0]) - 1, data.allSkills[0])
     # data.hoaresQSort(0, len(data.allSkills[1]) - 1, data.allSkills[1])
