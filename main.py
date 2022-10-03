@@ -29,7 +29,7 @@ class Data:
         for i, curList in enumerate(self.allSkills):
             print(self.categories[i])
             for entry in curList[::-1]:
-                print(entry)
+                print(str(entry))
             print("time taken: " + str(self.time[i]) + "\n")
 
         print("total time taken: " + str(self.totalTime))
@@ -98,13 +98,14 @@ class Data:
 
     def fillOutAllSkills(self):
         for line in self.lines:
-            numbers = [int(num) for num in line.split() if num.isdigit()]
-            self.allSkills[0].append(numbers[0])
-            self.allSkills[1].append(numbers[1])
-            self.allSkills[2].append(numbers[2])
-            self.allSkills[3].append(numbers[3])
-            self.allSkills[4].append(numbers[4])
-            self.totalXpOut.append((sum(numbers)))
+            if line:
+                numbers = [int(num) for num in line.split() if num.isdigit()]
+                self.allSkills[0].append(numbers[0])
+                self.allSkills[1].append(numbers[1])
+                self.allSkills[2].append(numbers[2])
+                self.allSkills[3].append(numbers[3])
+                self.allSkills[4].append(numbers[4])
+                self.totalXpOut.append((sum(numbers)))
 
 
     def turn2DToSepLists(self):
@@ -123,7 +124,7 @@ class Data:
         """
         self.readFromStdIn()
         self.stripEndlines()
-        self.turnLinesTo2DList()
+        # self.turnLinesTo2DList()
         self.fillOutAllSkills()
 
     def hoaresQSort(self, low, high, listToSort):
@@ -153,6 +154,28 @@ class Data:
             listToSort[left], listToSort[right] = listToSort[right], listToSort[left]
 
 
+    def countingSort(self, maxValue, listToSort):
+        sorted = []
+        counts = [0] * (maxValue+1)
+
+        for i in range(len(listToSort)):
+            if(listToSort[i] <= maxValue):
+                counts[listToSort[i]] += 1
+            # else merge sort
+
+        for i in range(maxValue):
+            while(counts[i] > 0):
+                counts[i] -= 1
+                sorted.append(i)
+
+        print(sorted)
+
+        # MERGE SORT
+
+        # save off counting sort list
+        # Then merge sort everything above maxVal in counting sort
+        # then combine two lists again
+
 
 
 # Press the green button in the gutter to run the script.
@@ -169,20 +192,25 @@ if __name__ == '__main__':
     #     data.turn2DToSepLists()
     #     data.printAllLists()
 
-
+# ===================================================
+#     data = Data()
+#     data.prepDataForSort()
+#     # listToSort = data.allSkills[0]
+#
+#     for skill in data.allSkills:
+#         start_time = time.time_ns()
+#         data.hoaresQSort(0, len(skill) - 1, skill)
+#         time_taken_in_microseconds = (time.time_ns() - start_time) / 1000.0
+#         data.time.append(time_taken_in_microseconds)
+#         # file = open("testOut", "w")
+#         # file.write("time taken: " + str(time_taken_in_microseconds))
+#     data.totalTime = sum(data.time)
+#     data.printAllLists()
+# ===================================================
 
     data = Data()
     data.prepDataForSort()
-    # listToSort = data.allSkills[0]
-
-    for skill in data.allSkills:
-        start_time = time.time_ns()
-        data.hoaresQSort(0, len(skill) - 1, skill)
-        time_taken_in_microseconds = (time.time_ns() - start_time) / 1000.0
-        data.time.append(time_taken_in_microseconds)
-        # file = open("testOut", "w")
-        # file.write("time taken: " + str(time_taken_in_microseconds))
-    data.totalTime = sum(data.time)
+    data.countingSort(10000, data.allSkills[0])
 
 
 
@@ -198,5 +226,5 @@ if __name__ == '__main__':
     # turn data back to list
     # data.turn2DToSepLists()
     # data.printAllLists()
-    data.printAllListsToFile()
-    data.printAllLists()
+    # data.printAllListsToFile()
+
