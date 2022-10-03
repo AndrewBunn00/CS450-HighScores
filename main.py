@@ -156,19 +156,30 @@ class Data:
 
     def countingSort(self, maxValue, listToSort):
         sorted = []
+        unsortedForMergeSort = []
+        sortedMergeSort = []
         counts = [0] * (maxValue+1)
 
         for i in range(len(listToSort)):
             if(listToSort[i] <= maxValue):
                 counts[listToSort[i]] += 1
-            # else merge sort
 
         for i in range(maxValue):
             while(counts[i] > 0):
                 counts[i] -= 1
                 sorted.append(i)
 
-        print(sorted)
+        # get a list of anything over max value
+        for val in listToSort:
+            if val > maxValue:
+                unsortedForMergeSort.append(val)
+
+        sortedMergeSort = self.mergeSort(maxValue, unsortedForMergeSort)
+
+        finalList = sorted + sortedMergeSort
+        return finalList
+
+        # print(sorted)
 
         # MERGE SORT
 
@@ -176,7 +187,36 @@ class Data:
         # Then merge sort everything above maxVal in counting sort
         # then combine two lists again
 
+    def mergeSort(self, maxValue, listToSort):
+        if len(listToSort) <= 1:
+            return listToSort
 
+        midpoint = len(listToSort) // 2
+
+        lHalf = self.mergeSort(maxValue, listToSort[0: midpoint])
+        uHalf = self.mergeSort(maxValue, listToSort[midpoint:])
+
+        return self.mergeSortedLists(lHalf, uHalf)
+
+
+    def mergeSortedLists(self, lHalf, uHalf):
+        result = []
+        lowerIndex = 0
+        upperIndex = 0
+
+        while((lowerIndex < len(lHalf)) or (upperIndex < len(uHalf))):
+            if(upperIndex >= len(uHalf)):
+                return result + lHalf[lowerIndex:]
+            if(lowerIndex >= len(lHalf)):
+                return result + uHalf[upperIndex:]
+            if(lHalf[lowerIndex] <= uHalf[upperIndex]):
+                result.append(lHalf[lowerIndex])
+                lowerIndex += 1
+            else:
+                result.append(uHalf[upperIndex])
+                upperIndex += 1
+
+        return result
 
 # Press the green button in the gutter to run the script.
 if __name__ == '__main__':
@@ -210,8 +250,10 @@ if __name__ == '__main__':
 
     data = Data()
     data.prepDataForSort()
-    data.countingSort(10000, data.allSkills[0])
-
+    # data.countingSort(10000, data.allSkills[0])
+    # helpMe = data.mergeSort(10000, data.allSkills[0])
+    data.allSkills[0] = data.countingSort(10000, data.allSkills[0])
+    print(data.allSkills[0])
 
 
     # data.hoaresQSort(0, len(data.allSkills[0]) - 1, data.allSkills[0])
