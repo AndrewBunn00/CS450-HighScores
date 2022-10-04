@@ -158,20 +158,19 @@ class Data:
 
 
     def customSort(self, maxValue, listToSort):
-        # COUNTING SORT
-        sortedList = []
+        """
+        My custom sort that uses counting sort on values 10000 and under,
+        then uses merge sort on the rest of the values. This is to account
+        for the skewed distribution where 98% of players have less than a
+        total of 10000 xp.
+        :param maxValue: the max value we will count sort
+        :param listToSort: the list we want to sort
+        :return: return the sorted list
+        """
         unsortedForMergeSort = []
         sortedMergeSort = []
-        counts = [0] * (maxValue+1)
 
-        for i in range(len(listToSort)):
-            if(listToSort[i] <= maxValue):
-                counts[listToSort[i]] += 1
-
-        for i in range(maxValue):
-            while(counts[i] > 0):
-                counts[i] -= 1
-                sortedList.append(i)
+        sortedList = self.countingSort(listToSort, maxValue)
 
         # get a list of anything over max value
         for val in listToSort:
@@ -181,33 +180,77 @@ class Data:
         # MERGE SORT
         sortedMergeSort = self.mergeSort(maxValue, unsortedForMergeSort)
 
-        # Combine for the final list
+        # Combine for the final list and return
         finalList = sortedList + sortedMergeSort
         return finalList
 
 
+    def countingSort(self, listToSort, maxValue):
+        """
+        Implementation of counting sort
+        :param listToSort: the list we want to sort
+        :param maxValue: the max value we will count sort
+        :return: return the sorted list
+        """
+        sortedList = []
+        counts = [0] * (maxValue + 1)
+
+        # build the list of counts from the list we want sorted
+        for i in range(len(listToSort)):
+            # if the value is below our threshold, include it
+            if (listToSort[i] <= maxValue):
+                counts[listToSort[i]] += 1
+
+        # convert list of counts back to list of integers
+        for i in range(maxValue):
+            while (counts[i] > 0):
+                counts[i] -= 1
+                sortedList.append(i)
+
+        return sortedList
+
     def mergeSort(self, maxValue, listToSort):
+        """
+        Function that merge sorts a list of numbers. Referenced the CS450 slides for this implementation
+        :param maxValue:
+        :param listToSort: list we want to merge sort
+        :return: return the sorted list
+        """
         if len(listToSort) <= 1:
             return listToSort
 
+        # do integer division
         midpoint = len(listToSort) // 2
 
+        # Sort from the first element to the midpoint
         lHalf = self.mergeSort(maxValue, listToSort[0: midpoint])
+        # sort from the midpoint to the end
         uHalf = self.mergeSort(maxValue, listToSort[midpoint:])
 
+        # recombine the lists
         return self.mergeSortedLists(lHalf, uHalf)
 
 
     def mergeSortedLists(self, lHalf, uHalf):
+        """
+        Put the sorted lists back together
+        :param lHalf: The lower list
+        :param uHalf: The upper list
+        :return: return the combined sorted list
+        """
         result = []
+        # indices of the next values to take from each list
         lowerIndex = 0
         upperIndex = 0
 
+        # while there are still values
         while((lowerIndex < len(lHalf)) or (upperIndex < len(uHalf))):
+            # if one of the lists is empty, add the rest of the other list to it and return it
             if(upperIndex >= len(uHalf)):
                 return result + lHalf[lowerIndex:]
             if(lowerIndex >= len(lHalf)):
                 return result + uHalf[upperIndex:]
+            # add the lower values to the results
             if(lHalf[lowerIndex] <= uHalf[upperIndex]):
                 result.append(lHalf[lowerIndex])
                 lowerIndex += 1
@@ -217,60 +260,40 @@ class Data:
 
         return result
 
-# Press the green button in the gutter to run the script.
+
 if __name__ == '__main__':
-    # whichSort = ""
-    # if(whichSort == "standard"):
-    #     print("Standard")
-    # elif(whichSort == "custom"):
-    #     print("Custom")
-    #     data = Data()
-    #     data.prepDataForSort()
-    #
-    #     # turn data back to list
-    #     data.turn2DToSepLists()
-    #     data.printAllLists()
+    # Runs the "standard" sort (Quick sort using Hoare's partitioning)
+    if(sys.argv[1] == "standard"):
+        print("Standard")
+        data = Data()
+        data.prepDataForSort()
 
-# ===================================================
-#     data = Data()
-#     data.prepDataForSort()
-#
-#     for skill in data.allSkills:
-#         start_time = time.time_ns()
-#         data.hoaresQSort(0, len(skill) - 1, skill)
-#         time_taken_in_microseconds = (time.time_ns() - start_time) / 1000.0
-#         data.time.append(time_taken_in_microseconds)
-#
-#     data.totalTime = sum(data.time)
-#     data.printAllLists()
-# ===================================================
+        # Sort each skill
+        for skill in data.allSkills:
+            start_time = time.time_ns()
+            data.hoaresQSort(0, len(skill) - 1, skill)
+            time_taken_in_microseconds = (time.time_ns() - start_time) / 1000.0
+            data.time.append(time_taken_in_microseconds)
 
-# CUSTOM SORT
-# ===================================================
-    data = Data()
-    data.prepDataForSort()
+        data.totalTime = sum(data.time)
+        # print all skills to standard out
+        data.printAllLists()
 
-    for i, skill in enumerate(data.allSkills):
-        start_time = time.time_ns()
-        data.allSkills[i] = data.customSort(10000, skill)
-        time_taken_in_microseconds = (time.time_ns() - start_time) / 1000.0
-        data.time.append(int(time_taken_in_microseconds))
+    elif(sys.argv[1] == "custom"):
+        # Run the custom sort (combination of counting and merge sort)
+        print("Custom")
+        data = Data()
+        data.prepDataForSort()
 
-    data.totalTime = sum(data.time)
-    data.printAllLists()
-# ===================================================
+        # Sort each skill
+        for i, skill in enumerate(data.allSkills):
+            start_time = time.time_ns()
+            data.allSkills[i] = data.customSort(10000, skill)
+            time_taken_in_microseconds = (time.time_ns() - start_time) / 1000.0
+            data.time.append(int(time_taken_in_microseconds))
 
-    # data.hoaresQSort(0, len(data.allSkills[0]) - 1, data.allSkills[0])
-    # data.hoaresQSort(0, len(data.allSkills[1]) - 1, data.allSkills[1])
-    # data.hoaresQSort(0, len(data.allSkills[2]) - 1, data.allSkills[2])
-    # data.hoaresQSort(0, len(data.allSkills[3]) - 1, data.allSkills[3])
-    # data.hoaresQSort(0, len(data.allSkills[4]) - 1, data.allSkills[4])
-    # data.hoaresQSort(0, len(data.allSkills[5]) - 1, data.allSkills[5])
+        data.totalTime = sum(data.time)
+        # print all skills to standard out
+        data.printAllLists()
 
-    # data.fillOutAllSkills()
-
-    # turn data back to list
-    # data.turn2DToSepLists()
-    # data.printAllLists()
-    # data.printAllListsToFile()
 
