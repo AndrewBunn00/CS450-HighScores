@@ -49,7 +49,6 @@ class Data:
                 file.write("time taken: " + str(self.time[i]) + "\n\n")
 
             file.write("total time taken: " + str(self.totalTime))
-            # file.close()
 
 
     def fileReader(self, filename):
@@ -263,37 +262,40 @@ class Data:
 
 if __name__ == '__main__':
     # Runs the "standard" sort (Quick sort using Hoare's partitioning)
-    if(sys.argv[1] == "standard"):
-        print("Standard")
-        data = Data()
-        data.prepDataForSort()
+    if(len(sys.argv) == 1):
+        print("Need to specify which sort you want to use ('custom' or 'standard).")
+    else:
+        if(sys.argv[1] == "standard"):
+            print("Standard")
+            data = Data()
+            data.prepDataForSort()
 
-        # Sort each skill
-        for skill in data.allSkills:
-            start_time = time.time_ns()
-            data.hoaresQSort(0, len(skill) - 1, skill)
-            time_taken_in_microseconds = (time.time_ns() - start_time) / 1000.0
-            data.time.append(time_taken_in_microseconds)
+            # Sort each skill
+            for skill in data.allSkills:
+                start_time = time.time_ns()
+                data.hoaresQSort(0, len(skill) - 1, skill)
+                time_taken_in_microseconds = (time.time_ns() - start_time) / 1000.0
+                data.time.append(int(time_taken_in_microseconds))
 
-        data.totalTime = sum(data.time)
-        # print all skills to standard out
-        data.printAllLists()
+            data.totalTime = sum(data.time)
+            # print all skills to standard out
+            data.printAllLists()
 
-    elif(sys.argv[1] == "custom"):
-        # Run the custom sort (combination of counting and merge sort)
-        print("Custom")
-        data = Data()
-        data.prepDataForSort()
+        elif(sys.argv[1] == "custom"):
+            # Run the custom sort (combination of counting and merge sort)
+            print("Custom")
+            data = Data()
+            data.prepDataForSort()
 
-        # Sort each skill
-        for i, skill in enumerate(data.allSkills):
-            start_time = time.time_ns()
-            data.allSkills[i] = data.customSort(10000, skill)
-            time_taken_in_microseconds = (time.time_ns() - start_time) / 1000.0
-            data.time.append(int(time_taken_in_microseconds))
+            # Sort each skill
+            for i, skill in enumerate(data.allSkills):
+                start_time = time.time_ns()
+                data.allSkills[i] = data.customSort(10000, skill)
+                time_taken_in_microseconds = (time.time_ns() - start_time) / 1000.0
+                data.time.append(int(time_taken_in_microseconds))
 
-        data.totalTime = sum(data.time)
-        # print all skills to standard out
-        data.printAllLists()
+            data.totalTime = sum(data.time)
+            # print all skills to standard out
+            data.printAllLists()
 
 
